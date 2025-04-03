@@ -1,0 +1,54 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyTypeCheckerInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="apps.models.Category.*" />
+          <option value="core.account.models.Administrator.*" />
+          <option value="app.models.ApplicationForm.*" />
+          <option value="core.sms.models.AuthSms.*" />
+          <option value="app.models.Category.*" />
+          <option value="core.account.models.Use.*" />
+          <option value="core.operation.models.Booking.*" />
+          <option value="core.operation.models.Feedback.*" />
+          <option value="core.account.models.DeviceChangeHistory.*" />
+          <option value="core.alliance.models.ClubOperation.*" />
+          <option value="core.alliance.models.Club.*" />
+          <option value="core.account.models.ShotStack.*" />
+          <option value="dict.*" />
+          <option value="core.alliance.models.WelfareMall.*" />
+          <option value="core.account.models.WFWNestUser.*" />
+          <option value="core.alliance.models.PointMall.*" />
+          <option value="core.transaction.models.RedeemCode.*" />
+          <option value="core.transaction.models.Plan.*" />
+          <option value="rooms.models.Room.*" />
+          <option value="rooms.models.Photo.*" />
+          <option value="apps.models.Post.*" />
+          <option value="django.db.models.fields.related.ForeignKey.*" />
+          <option value="users.models.User.*" />
+          <option value="apps.models.Comment.*" />
+          <option value="apps.models.Photo.*" />
+          <option value="users.models.Follow.*" />
+          <option value="apps.models.Like.*" />
+          <option value="type.*" />
+          <option value="apps.models.alliance.models.Restaurant.*" />
+          <option value="apps.models.alliance.models.MenuCategory.*" />
+          <option value="apps.models.account.models.User.*" />
+          <option value="core.use.models.Post.objects" />
+          <option value="core.account.models.JWTokens.*" />
+          <option value="core.use.models.PostLike.*" />
+          <option value="core.use.models.Comments.*" />
+          <option value="core.use.models.Following.*" />
+          <option value="user.models.Profile.*" />
+          <option value="service.models.Prescription.*" />
+          <option value="service.models.DiagnosisRequest.*" />
+          <option value="core.operation.models.ClubReport.*" />
+          <option value="apps.models.DiagnosisRequest.*" />
+          <option value="user.models.Payment.*" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
