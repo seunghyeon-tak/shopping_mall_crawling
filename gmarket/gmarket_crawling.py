@@ -11,6 +11,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
 load_dotenv()
@@ -25,19 +27,17 @@ DB_CONFIG = {
     "autocommit": True
 }
 
-# 카테고리 매핑
 category_map = {
-    "에어팟": "이어폰",
-    "버즈": "이어폰",
-    "충전기": "충전기",
-    "케이블": "충전기",
-    "키보드": "입력기기",
-    "마우스": "입력기기",
-    "보조배터리": "충전기",
-    "모니터": "디스플레이",
-    "헤드폰": "이어폰",
-    "스마트워치": "웨어러블",
-    "케이스": "스마트폰 액세서리"
+    "디지털 도어락": "스마트홈",
+    "게이밍 마우스": "입력기기",
+    "노트북 받침대": "노트북 액세서리",
+    "차량용 무선 충전기": "차량용 디지털",
+    "PC 스피커": "오디오",
+    "HDMI 분배기": "영상장비",
+    "기계식 키보드": "입력기기",
+    "디지털 타이머": "소형가전",
+    "전자노트": "전자문구",
+    "USB C to HDMI 케이블": "영상장비"
 }
 
 with open("../selectors.json", "r", encoding="utf-8") as f:
@@ -52,7 +52,6 @@ def classify_category(keyword):
 
 
 def parse_price(price_str):
-    # 가격에서 가장 앞에 나오는 숫자 하나 추출
     match = re.search(r"\d[\d,]*", price_str)
     if match:
         return float(match.group().replace(",", ""))
@@ -61,7 +60,9 @@ def parse_price(price_str):
 
 def get_driver():
     options = Options()
-    options.add_argument("--headless")  # 브라우저 안 띄움
+    options.add_argument("--headless=new")  # 최신 방식 headless
+    options.add_argument("--disable-blink-features=AutomationControlled")  # 자동화 감지 우회
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36")  # 진짜 브라우저처럼 위장
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
@@ -104,15 +105,16 @@ def save_price(cursor, product_id, price):
     """, (product_id, price, datetime.now()))
 
 
-def search_11st_with_selenium(keyword, max_results=5):
-    sel = SELECTORS["11st"]
+def search_gmarket_with_selenium(keyword, max_results=5):
+    sel = SELECTORS["gmarket"]
 
     driver = get_driver()
     encoded_keyword = urllib.parse.quote(keyword)
-    url = f"https://search.11st.co.kr/Search.tmall?kwd={encoded_keyword}"
+    url = f"https://browse.gmarket.co.kr/search?keyword={encoded_keyword}"
 
     driver.get(url)
-    time.sleep(3)  # JS 렌더링 기다림
+    wait = WebDriverWait(driver, 10)
+    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, sel["item"])))
 
     items = driver.find_elements(By.CSS_SELECTOR, sel["item"])
     results = []
@@ -130,10 +132,11 @@ def search_11st_with_selenium(keyword, max_results=5):
 
             results.append({
                 "title": title,
-                "price": float(price),
+                "price": price,
                 "link": link,
                 "image": image
             })
+
         except Exception as e:
             print(f"[⚠️] 상품 파싱 실패: {e}")
             continue
@@ -149,14 +152,15 @@ def main():
     conn = pymysql.connect(**DB_CONFIG)
     cursor = conn.cursor()
 
-    store_id = get_or_create_id(cursor, "stores", "11번가")
+    store_id = get_or_create_id(cursor, "stores", "G마켓")
 
     for keyword in keywords:
         print(f"\n[🔍] 크롤링 중: {keyword}")
         category_name = classify_category(keyword)
         category_id = get_or_create_id(cursor, "categories", category_name)
 
-        results = search_11st_with_selenium(keyword)
+        results = search_gmarket_with_selenium(keyword)
+
         for r in results:
             product_id = save_product(
                 cursor,
@@ -171,10 +175,9 @@ def main():
             print(f"  ⤷ 저장 완료: {r['title']}")
 
         time.sleep(1)
-
     cursor.close()
     conn.close()
-    print("\n[✅] 크롤링 + DB 저장 완료!")
+    print("\n[✅] G마켓 크롤링 완료!")
 
 
 if __name__ == "__main__":

@@ -1,9 +1,0 @@
-{
-  "11st": {
-    "item": ".c-card-item",
-    "title": "div.c-card-item__name dd",
-    "price": ".c-card-item__price",
-    "link": "a.c-card-item__anchor",
-    "image": ".c-card-item__thumb img"
-  }
-}

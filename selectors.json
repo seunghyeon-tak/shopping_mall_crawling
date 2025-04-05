@@ -1,0 +1,16 @@
+{
+  "11st": {
+    "item": ".c-card-item",
+    "title": "div.c-card-item__name dd",
+    "price": ".c-card-item__price",
+    "link": "a.c-card-item__anchor",
+    "image": ".c-card-item__thumb img"
+  },
+  "gmarket": {
+    "item": "div.box__component.box__component-itemcard.box__component-itemcard--general",
+    "title": "span.text__item",
+    "price": "strong.text__value",
+    "link": "a.link__item",
+    "image": "img"
+  }
+}
