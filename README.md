@@ -33,12 +33,10 @@ project-root/
 │   ├── 11st_crawling.py
 │   ├── keywords.txt
 │   └── selectors.json
-├── coupang/
-│   └── coupang_crawling.py
 ├── auction/
 │   └── auction_crawling.py
-├── interpark/
-│   └── interpark_crawling.py
+├── gmarket/
+│   └── gmarket_crawling.py
 └── README.md
 ```
 
