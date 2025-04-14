@@ -8,61 +8,56 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from common import *
 
-category_map = {
-    "디지털 도어락": "스마트홈",
-    "게이밍 마우스": "입력기기",
-    "노트북 받침대": "노트북 액세서리",
-    "차량용 무선 충전기": "차량용 디지털",
-    "PC 스피커": "오디오",
-    "HDMI 분배기": "영상장비",
-    "기계식 키보드": "입력기기",
-    "디지털 타이머": "소형가전",
-    "전자노트": "전자문구",
-    "USB C to HDMI 케이블": "영상장비"
-}
-
 
 def search_gmarket_with_selenium(keyword, max_results=5):
     sel = load_selectors()["gmarket"]
-
-    driver = get_driver()
-    url = f"https://browse.gmarket.co.kr/search?keyword={urllib.parse.quote(keyword)}"
-
-    driver.get(url)
-    wait = WebDriverWait(driver, 10)
-    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, sel["item"])))
-
-    items = driver.find_elements(By.CSS_SELECTOR, sel["item"])
     results = []
 
-    for item in items[:max_results]:
-        try:
-            title = item.find_element(By.CSS_SELECTOR, sel["title"]).text
-            price = parse_price(item.find_element(By.CSS_SELECTOR, sel["price"]).text)
-            if price is None:
-                print(f"[❗] 가격 파싱 실패 → '{price}'")
+    try:
+        driver = get_driver()
+        url = f"https://browse.gmarket.co.kr/search?keyword={urllib.parse.quote(keyword)}"
+
+        driver.get(url)
+        wait = WebDriverWait(driver, 10)
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, sel["item"])))
+
+        items = driver.find_elements(By.CSS_SELECTOR, sel["item"])
+
+
+        for item in items[:max_results]:
+            try:
+                title = item.find_element(By.CSS_SELECTOR, sel["title"]).text
+                price = parse_price(item.find_element(By.CSS_SELECTOR, sel["price"]).text)
+                if price is None:
+                    print(f"[❗] 가격 파싱 실패 → '{price}'")
+                    continue
+
+                link = item.find_element(By.CSS_SELECTOR, sel["link"]).get_attribute("href")
+                image = item.find_element(By.CSS_SELECTOR, sel["image"]).get_attribute("src")
+
+                results.append({
+                    "title": title,
+                    "price": price,
+                    "link": link,
+                    "image": image
+                })
+
+            except Exception as e:
+                print(f"[⚠️] 상품 파싱 실패: {e}")
                 continue
+    except Exception as e:
+        print(f"[🚨] 전체 페이지 파싱 실패: {e}")
+    finally:
+        try:
+            driver.quit()
+        except:
+            pass
 
-            link = item.find_element(By.CSS_SELECTOR, sel["link"]).get_attribute("href")
-            image = item.find_element(By.CSS_SELECTOR, sel["image"]).get_attribute("src")
-
-            results.append({
-                "title": title,
-                "price": price,
-                "link": link,
-                "image": image
-            })
-
-        except Exception as e:
-            print(f"[⚠️] 상품 파싱 실패: {e}")
-            continue
-
-    driver.quit()
     return results
 
 
 def main():
-    with open("gmarket/keywords.txt", "r", encoding="utf-8") as f:
+    with open("keywords.txt", "r", encoding="utf-8") as f:
         keywords = [line.strip() for line in f if line.strip()]
 
     conn = pymysql.connect(**DB_CONFIG)
@@ -77,6 +72,10 @@ def main():
 
         results = search_gmarket_with_selenium(keyword)
 
+        if not results:
+            print("[⚠️] 크롤링 결과 없음, 건너뜀")
+            continue
+
         for r in results:
             product_id = save_product(
                 cursor,
@@ -87,7 +86,7 @@ def main():
                 description=""
             )
             save_image(cursor, product_id, r["image"])
-            save_price(cursor, product_id, r["price"])
+            save_price(cursor, product_id, store_id, r["price"])
             print(f"  ⤷ 저장 완료: {r['title']}")
 
         time.sleep(1)
