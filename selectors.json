@@ -12,5 +12,12 @@
     "price": "strong.text__value",
     "link": "a.link__item",
     "image": "img"
+  },
+  "auction": {
+    "item": ".section--itemcard",
+    "title": ".text--title",
+    "price": ".text__price-seller",
+    "link": "a.link--itemcard",
+    "image": "img.image--itemcard"
   }
 }

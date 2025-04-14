@@ -29,14 +29,13 @@ Spring Boot 기반 상품 가격 비교 프로젝트에서 실시간 가격 정�
 
 ```text
 project-root/
-├── 11st/
-│   ├── 11st_crawling.py
-│   ├── keywords.txt
-│   └── selectors.json
-├── auction/
-│   └── auction_crawling.py
-├── gmarket/
-│   └── gmarket_crawling.py
+├── 11st_crawling.py
+├── auction_crawling.py
+├── gmarket_crawling.py
+├── common.py
+├── requirements.txt
+├── keywords.txt
+├── selectors.json
 └── README.md
 ```
 

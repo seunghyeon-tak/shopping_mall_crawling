@@ -3,30 +3,33 @@ import urllib.parse
 
 import pymysql
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 from common import *
 
 
-def search_11st_with_selenium(keyword, max_results=5):
-    sel = load_selectors()["11st"]
+def search_auction_with_selenium(keyword, max_result=5):
+    sel = load_selectors()["auction"]
     results = []
 
     try:
         driver = get_driver()
-        encoded_keyword = urllib.parse.quote(keyword)
-        url = f"https://search.11st.co.kr/Search.tmall?kwd={encoded_keyword}"
+        url = f"https://browse.auction.co.kr/search?keyword={urllib.parse.quote(keyword)}"
 
         driver.get(url)
-        time.sleep(3)  # JS 렌더링 기다림
+        wait = WebDriverWait(driver, 10)
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, sel["item"])))
 
         items = driver.find_elements(By.CSS_SELECTOR, sel["item"])
 
-        for item in items[:max_results]:
+        for item in items[:max_result]:
             try:
                 title = item.find_element(By.CSS_SELECTOR, sel["title"]).text
-                price = parse_price(item.find_element(By.CSS_SELECTOR, sel["price"]).text)
-                if price is None:
-                    print(f"[❗] 가격 파싱 실패 → '{price}'")
+                try:
+                    price = parse_price(item.find_element(By.CSS_SELECTOR, sel["price"]).text)
+                except:
+                    print(f"[⚠️] 가격 요소 없음, 건너뜀")
                     continue
 
                 link = item.find_element(By.CSS_SELECTOR, sel["link"]).get_attribute("href")
@@ -34,12 +37,13 @@ def search_11st_with_selenium(keyword, max_results=5):
 
                 results.append({
                     "title": title,
-                    "price": float(price),
+                    "price": price,
                     "link": link,
                     "image": image
                 })
+
             except Exception as e:
-                print(f"[⚠️] 상품 파싱 실패: {e}")
+                print(f"[⚠️] 상품 파싱 오류: {e}")
                 continue
     except Exception as e:
         print(f"[🚨] 전체 페이지 파싱 실패: {e}")
@@ -58,15 +62,14 @@ def main():
 
     conn = pymysql.connect(**DB_CONFIG)
     cursor = conn.cursor()
-
-    store_id = get_or_create_id(cursor, "stores", "11번가")
+    store_id = get_or_create_id(cursor, "stores", "옥션")
 
     for keyword in keywords:
         print(f"\n[🔍] 크롤링 중: {keyword}")
         category_name = classify_category(keyword)
         category_id = get_or_create_id(cursor, "categories", category_name)
 
-        results = search_11st_with_selenium(keyword)
+        results = search_auction_with_selenium(keyword)
 
         if not results:
             print("[⚠️] 크롤링 결과 없음, 건너뜀")
@@ -89,7 +92,7 @@ def main():
 
     cursor.close()
     conn.close()
-    print("\n[✅] 크롤링 + DB 저장 완료!")
+    print("\n[✅] 옥션 크롤링 완료!")
 
 
 if __name__ == "__main__":

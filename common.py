@@ -21,14 +21,37 @@ DB_CONFIG = {
     "autocommit": True
 }
 
+UNIFIED_CATEGORY_MAP = {
+    "에어팟": "이어폰",
+    "버즈": "이어폰",
+    "헤드폰": "이어폰",
+    "충전기": "충전기",
+    "케이스": "스마트폰 액세서리",
+    "마우스": "입력기기",
+    "키보드": "입력기기",
+    "보조배터리": "충전기",
+    "모니터": "모니터",
+    "스마트워치": "웨어러블",
+    "스트랩": "웨어러블",
+    "도어락": "스마트홈",
+    "노트북 받침대": "노트북 액세서리",
+    "차량용 무선 충전기": "차량용 디지털",
+    "스피커": "오디오",
+    "HDMI 분배기": "영상장비",
+    "USB C to HDMI": "영상장비",
+    "타이머": "소형가전",
+    "전자노트": "전자문구"
+}
+
 
 def load_selectors():
     with open("selectors.json", "r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def classify_category(keyword, category_map):
-    for word, category in category_map.items():
+def classify_category(keyword):
+    # 카테고리 매핑
+    for word, category in UNIFIED_CATEGORY_MAP.items():
         if word in keyword:
             return category
     return "기타"
@@ -85,8 +108,8 @@ def save_image(cursor, product_id, image_url):
         """, (product_id, image_url, 1))
 
 
-def save_price(cursor, product_id, price):
+def save_price(cursor, product_id, store_id, price):
     cursor.execute("""
-        INSERT INTO product_prices (product_id, price, crawled_at)
-        VALUES (%s, %s, %s)
-    """, (product_id, price, datetime.now()))
+        INSERT INTO product_prices (product_id, store_id, price, crawled_at)
+        VALUES (%s, %s, %s, %s)
+    """, (product_id, store_id, price, datetime.now()))
