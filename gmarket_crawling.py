@@ -1,15 +1,13 @@
-import time
 import urllib.parse
 
 import pymysql
-from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from common import *
 
 
-def search_gmarket_with_selenium(keyword, max_results=5):
+def search_gmarket_with_selenium(keyword, max_results=20):
     sel = load_selectors()["gmarket"]
     results = []
 
@@ -22,7 +20,6 @@ def search_gmarket_with_selenium(keyword, max_results=5):
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, sel["item"])))
 
         items = driver.find_elements(By.CSS_SELECTOR, sel["item"])
-
 
         for item in items[:max_results]:
             try:
@@ -77,14 +74,19 @@ def main():
             continue
 
         for r in results:
+            # 지마켓은 스펙 데이터 없음
+            key_features_json = "{}"
+
             product_id = save_product(
                 cursor,
                 name=r["title"],
                 store_id=store_id,
                 category_id=category_id,
                 url=r["link"],
-                description=""
+                description="",
+                key_features=key_features_json
             )
+
             save_image(cursor, product_id, r["image"])
             save_price(cursor, product_id, store_id, r["price"])
             print(f"  ⤷ 저장 완료: {r['title']}")

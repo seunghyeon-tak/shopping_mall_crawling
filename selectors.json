@@ -4,20 +4,29 @@
     "title": "div.c-card-item__name dd",
     "price": ".c-card-item__price",
     "link": "a.c-card-item__anchor",
-    "image": ".c-card-item__thumb img"
+    "image": ".c-card-item__thumb img",
+    "spec_row": "div.product-spec div.spec-area dl.spec-list",
+    "spec_key": "dt",
+    "spec_value": "dd"
   },
   "gmarket": {
     "item": "div.box__component.box__component-itemcard.box__component-itemcard--general",
     "title": "span.text__item",
     "price": "strong.text__value",
     "link": "a.link__item",
-    "image": "img"
+    "image": "img",
+    "spec_row": "div#itemcase_basic div.item-topinfo table.item-topinfo_table tr",
+    "spec_key": "th",
+    "spec_value": "td"
   },
   "auction": {
     "item": ".section--itemcard",
     "title": ".text--title",
     "price": ".text__price-seller",
     "link": "a.link--itemcard",
-    "image": "img.image--itemcard"
+    "image": "img.image--itemcard",
+    "spec_row": "div#itemInfo div.section_spec table.spec_table tr",
+    "spec_key": "th",
+    "spec_value": "td"
   }
 }

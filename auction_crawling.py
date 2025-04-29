@@ -1,15 +1,13 @@
-import time
 import urllib.parse
 
 import pymysql
-from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from common import *
 
 
-def search_auction_with_selenium(keyword, max_result=5):
+def search_auction_with_selenium(keyword, max_result=20):
     sel = load_selectors()["auction"]
     results = []
 
@@ -76,13 +74,16 @@ def main():
             continue
 
         for r in results:
+            key_features_json = "{}"
+
             product_id = save_product(
                 cursor,
                 name=r["title"],
                 store_id=store_id,
                 category_id=category_id,
                 url=r["link"],
-                description=""
+                description="",
+                key_features=key_features_json
             )
             save_image(cursor, product_id, r["image"])
             save_price(cursor, product_id, store_id, r["price"])

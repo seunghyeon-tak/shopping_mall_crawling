@@ -87,15 +87,15 @@ def get_or_create_id(cursor, table, name):
     return cursor.lastrowid
 
 
-def save_product(cursor, name, store_id, category_id, url, description):
+def save_product(cursor, name, store_id, category_id, url, description, key_features="{}"):
     cursor.execute("SELECT id FROM products WHERE name = %s AND purchase_url = %s", (name, url))
     result = cursor.fetchone()
     if result:
         return result[0]
     cursor.execute("""
-        INSERT INTO products (name, store_id, category_id, purchase_url, description)
-        VALUES (%s, %s, %s, %s, %s)
-    """, (name, store_id, category_id, url, description))
+        INSERT INTO products (name, store_id, category_id, purchase_url, description, key_features, is_active, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    """, (name, store_id, category_id, url, description, key_features, True, datetime.now()))
     return cursor.lastrowid
 
 

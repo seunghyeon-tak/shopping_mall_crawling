@@ -1,13 +1,12 @@
-import time
 import urllib.parse
 
 import pymysql
-from selenium.webdriver.common.by import By
+import requests
 
 from common import *
 
 
-def search_11st_with_selenium(keyword, max_results=5):
+def search_11st_with_selenium(keyword, max_results=20):
     sel = load_selectors()["11st"]
     results = []
 
@@ -52,6 +51,60 @@ def search_11st_with_selenium(keyword, max_results=5):
     return results
 
 
+def extract_product_id_from_link(link):
+    try:
+        # 광고 리디렉션 링크인지 확인
+        if "adoffice.11st.co.kr" in link:
+            parsed = urllib.parse.urlparse(link)
+            params = urllib.parse.parse_qs(parsed.query)
+            redirect_url = params.get("redirect", [None])[0]
+            if redirect_url:
+                link = urllib.parse.unquote(redirect_url)  # URL 디코딩
+
+        # 이제 정상적인 11번가 상품 URL이 됐으니 productId 추출
+        match = re.search(r'/products/(?:pa/)?(\d+)', link)
+        if match:
+            return match.group(1)
+        else:
+            print(f"[⚠️] productId 추출 실패: {link}")
+            return None
+
+    except Exception as e:
+        print(f"[🚨] productId 추출 중 에러: {e}")
+        return None
+
+
+
+def get_11st_key_features(product_id):
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
+    url = f"https://apis.11st.co.kr/product/pd/v1/products/{product_id}/product-information"
+
+    try:
+        response = requests.get(url, headers=headers, timeout=5)
+        if response.status_code != 200:
+            print(f"[⚠️] 스펙 API 요청 실패: {response.status_code}")
+            return json.dumps({})
+
+        data = response.json()
+        key_features = {}
+
+        groups = data.get("data", {}).get("productInformationGroups", [])
+        for group in groups:
+            for item in group.get("productInformationItems", []):
+                key = item["title"].strip().lower().replace(' ', '_')
+                value = item["content"].strip()
+                if key and value:
+                    key_features[key] = value
+
+        return json.dumps(key_features, ensure_ascii=False)
+
+    except Exception as e:
+        print(f"[🚨] 스펙 API 호출 실패: {e}")
+        return json.dumps({})
+
+
 def main():
     with open("keywords.txt", "r", encoding="utf-8") as f:
         keywords = [line.strip() for line in f if line.strip()]
@@ -73,13 +126,20 @@ def main():
             continue
 
         for r in results:
+            product_id = extract_product_id_from_link(r["link"])
+            if not product_id:
+                continue
+
+            key_features_json = get_11st_key_features(product_id)
+
             product_id = save_product(
                 cursor,
                 name=r["title"],
                 store_id=store_id,
                 category_id=category_id,
                 url=r["link"],
-                description=""
+                description="",
+                key_features=key_features_json
             )
             save_image(cursor, product_id, r["image"])
             save_price(cursor, product_id, store_id, r["price"])
@@ -89,7 +149,7 @@ def main():
 
     cursor.close()
     conn.close()
-    print("\n[✅] 크롤링 + DB 저장 완료!")
+    print("\n[✅] 11번가 크롤링 완료!")
 
 
 if __name__ == "__main__":
