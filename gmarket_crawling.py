@@ -1,7 +1,9 @@
 import urllib.parse
+import time
 
 import pymysql
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
 from common import *

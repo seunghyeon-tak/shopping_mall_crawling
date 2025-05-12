@@ -1,7 +1,9 @@
+import time
 import urllib.parse
 
 import pymysql
 import requests
+from selenium.webdriver.common.by import By
 
 from common import *
 
@@ -72,7 +74,6 @@ def extract_product_id_from_link(link):
     except Exception as e:
         print(f"[🚨] productId 추출 중 에러: {e}")
         return None
-
 
 
 def get_11st_key_features(product_id):
